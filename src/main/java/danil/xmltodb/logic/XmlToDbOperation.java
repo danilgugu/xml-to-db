@@ -2,6 +2,7 @@ package danil.xmltodb.logic;
 
 import danil.xmltodb.builder.BoxXmlToDbBuilder;
 import danil.xmltodb.builder.ItemXmlToDbBuilder;
+import danil.xmltodb.helper.FileHelper;
 import danil.xmltodb.helper.XmlUnmarshaller;
 import danil.xmltodb.model.db.Box;
 import danil.xmltodb.model.db.Item;
@@ -26,17 +27,19 @@ public class XmlToDbOperation {
     private final ItemXmlToDbBuilder itemXmlToDbBuilder;
     private final BoxService boxService;
     private final ItemService itemService;
+    private final FileHelper fileHelper;
 
     public XmlToDbOperation(XmlUnmarshaller xmlUnmarshaller,
                             BoxXmlToDbBuilder boxXmlToDbBuilder,
                             ItemXmlToDbBuilder itemXmlToDbBuilder,
                             BoxService boxService,
-                            ItemService itemService) {
+                            ItemService itemService, FileHelper fileHelper) {
         this.xmlUnmarshaller = xmlUnmarshaller;
         this.boxXmlToDbBuilder = boxXmlToDbBuilder;
         this.itemXmlToDbBuilder = itemXmlToDbBuilder;
         this.boxService = boxService;
         this.itemService = itemService;
+        this.fileHelper = fileHelper;
     }
 
     public void process(String fileName) {
@@ -61,6 +64,8 @@ public class XmlToDbOperation {
         getAllBoxesAndItemsContainedIn(boxes, boxesToSave, itemsToSave, null);
         boxService.saveAll(boxesToSave);
         itemService.saveAll(itemsToSave);
+        logAllBoxes(boxesToSave);
+        logAllItems(itemsToSave);
     }
 
     private void getAllBoxesAndItemsContainedIn(List<BoxXml> boxes,
@@ -83,5 +88,30 @@ public class XmlToDbOperation {
                 getAllBoxesAndItemsContainedIn(innerBoxes, boxesToSave, itemsToSave, currentBoxId);
             });
         }
+    }
+
+    private void logAllItems(List<Item> items) {
+        String content = "Items: \n" +
+                "ID CONTAINED_IN COLOR\n" + items.stream()
+                .map(item -> {
+                    String color = item.getColor();
+                    if (Objects.isNull(color)) {
+                        color = "";
+                    }
+                    return item.getId() + " " +
+                            item.getContainedIn() + " " +
+                            color;
+                })
+                .collect(Collectors.joining("\n"));
+        fileHelper.write(content, "src/main/resources/items.log");
+    }
+
+    private void logAllBoxes(List<Box> boxes) {
+        String content = "Boxes: \n" +
+                "ID CONTAINED_IN\n" +boxes.stream()
+                .map(box -> box.getId() + " " +
+                        box.getContainedIn())
+                .collect(Collectors.joining("\n"));
+        fileHelper.write(content, "src/main/resources/boxes.log");
     }
 }
