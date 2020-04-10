@@ -18,4 +18,8 @@ public class ItemService {
     public void saveAll(List<Item> items) {
         itemRepository.saveAll(items);
     }
+
+    public List<Integer> findAllByColorAndContainedIn(String color, Integer containedIn) {
+        return itemRepository.findAllByColorAndContainedIn(color, containedIn);
+    }
 }

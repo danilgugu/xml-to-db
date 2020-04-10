@@ -17,6 +17,10 @@ public class Item {
     @Column(name = "contained_in")
     private int containedIn;
 
+    public int getId() {
+        return id;
+    }
+
     public void setId(int id) {
         this.id = id;
     }

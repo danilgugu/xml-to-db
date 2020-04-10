@@ -1,0 +1,60 @@
+openapi: 3.0.0
+
+info:
+  title: XmlToDbApp
+  description: api for items and boxes
+  version: '1'
+
+servers:
+  - url: http://localhost:8080/boxApi
+
+paths:
+  /items:
+    post:
+      description: returns all items mathed by color and contained in bucket with id=containedIn (at the top level)
+      operationId: getItemsByColorContainedInBoxRecursively
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                containedIn:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
