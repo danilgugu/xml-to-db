@@ -1,24 +1,21 @@
 package danil.xmltodb.model.db;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "item")
 public class Item {
 
-    @Id
     private int id;
-
     private String color;
-
-    @Column(name = "contained_in")
     private int containedIn;
 
     public int getId() {
         return id;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public int getContainedIn() {
+        return containedIn;
     }
 
     public void setId(int id) {

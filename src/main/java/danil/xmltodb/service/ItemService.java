@@ -1,6 +1,6 @@
 package danil.xmltodb.service;
 
-import danil.xmltodb.dao.ItemRepository;
+import danil.xmltodb.dao.ItemDao;
 import danil.xmltodb.model.db.Item;
 import org.springframework.stereotype.Service;
 
@@ -9,17 +9,17 @@ import java.util.List;
 @Service
 public class ItemService {
 
-    private final ItemRepository itemRepository;
+    private final ItemDao itemDao;
 
-    public ItemService(ItemRepository itemRepository) {
-        this.itemRepository = itemRepository;
+    public ItemService(ItemDao itemDao) {
+        this.itemDao = itemDao;
     }
 
     public void saveAll(List<Item> items) {
-        itemRepository.saveAll(items);
+        itemDao.saveAll(items);
     }
 
     public List<Integer> findAllByColorAndContainedIn(String color, Integer containedIn) {
-        return itemRepository.findAllByColorAndContainedIn(color, containedIn);
+        return itemDao.findAllByColorAndContainedIn(color, containedIn);
     }
 }
