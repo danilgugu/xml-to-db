@@ -2,7 +2,7 @@ package danil.xmltodb.logic;
 
 import danil.xmltodb.builder.BoxXmlToDbBuilder;
 import danil.xmltodb.builder.ItemXmlToDbBuilder;
-import danil.xmltodb.helper.FileHelper;
+import danil.xmltodb.helper.EntityFileLogger;
 import danil.xmltodb.helper.XmlUnmarshaller;
 import danil.xmltodb.model.db.Box;
 import danil.xmltodb.model.db.Item;
@@ -11,6 +11,8 @@ import danil.xmltodb.model.xml.ItemXml;
 import danil.xmltodb.model.xml.Storage;
 import danil.xmltodb.service.BoxService;
 import danil.xmltodb.service.ItemService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
@@ -19,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 @Component
 public class XmlToDbOperation {
 
@@ -27,27 +31,16 @@ public class XmlToDbOperation {
     private final ItemXmlToDbBuilder itemXmlToDbBuilder;
     private final BoxService boxService;
     private final ItemService itemService;
-    private final FileHelper fileHelper;
-
-    public XmlToDbOperation(XmlUnmarshaller xmlUnmarshaller,
-                            BoxXmlToDbBuilder boxXmlToDbBuilder,
-                            ItemXmlToDbBuilder itemXmlToDbBuilder,
-                            BoxService boxService,
-                            ItemService itemService, FileHelper fileHelper) {
-        this.xmlUnmarshaller = xmlUnmarshaller;
-        this.boxXmlToDbBuilder = boxXmlToDbBuilder;
-        this.itemXmlToDbBuilder = itemXmlToDbBuilder;
-        this.boxService = boxService;
-        this.itemService = itemService;
-        this.fileHelper = fileHelper;
-    }
+    private final EntityFileLogger entityFileLogger;
 
     public void process(String fileName) {
+        log.info("XmlToDbOperation.process started. File to parse: " + fileName);
         try {
             Storage mainStorage = xmlUnmarshaller.unmarshall(fileName);
             saveAll(mainStorage);
+            log.info("XmlToDbOperation.process finished.");
         } catch (JAXBException e) {
-            e.printStackTrace();
+            log.error("JAXBException", e.getCause());
         }
     }
 
@@ -64,14 +57,13 @@ public class XmlToDbOperation {
         getAllBoxesAndItemsContainedIn(boxes, boxesToSave, itemsToSave, null);
         boxService.saveAll(boxesToSave);
         itemService.saveAll(itemsToSave);
-        logAllBoxes(boxesToSave);
-        logAllItems(itemsToSave);
+        entityFileLogger.logAll(boxesToSave, itemsToSave);
     }
 
     private void getAllBoxesAndItemsContainedIn(List<BoxXml> boxes,
-                                        List<Box> boxesToSave,
-                                        List<Item> itemsToSave,
-                                        Integer containsIn) {
+                                                List<Box> boxesToSave,
+                                                List<Item> itemsToSave,
+                                                Integer containsIn) {
         if (Objects.nonNull(boxes) && !boxes.isEmpty()) {
             boxesToSave.addAll(boxes.stream()
                 .map(boxXml -> boxXmlToDbBuilder.build(boxXml, containsIn))
@@ -90,28 +82,4 @@ public class XmlToDbOperation {
         }
     }
 
-    private void logAllItems(List<Item> items) {
-        String content = "Items: \n" +
-                "ID CONTAINED_IN COLOR\n" + items.stream()
-                .map(item -> {
-                    String color = item.getColor();
-                    if (Objects.isNull(color)) {
-                        color = "";
-                    }
-                    return item.getId() + " " +
-                            item.getContainedIn() + " " +
-                            color;
-                })
-                .collect(Collectors.joining("\n"));
-        fileHelper.write(content, "src/main/resources/items.log");
-    }
-
-    private void logAllBoxes(List<Box> boxes) {
-        String content = "Boxes: \n" +
-                "ID CONTAINED_IN\n" +boxes.stream()
-                .map(box -> box.getId() + " " +
-                        box.getContainedIn())
-                .collect(Collectors.joining("\n"));
-        fileHelper.write(content, "src/main/resources/boxes.log");
-    }
 }

@@ -1,6 +1,7 @@
 package danil.xmltodb.dao;
 
 import danil.xmltodb.model.db.Item;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -10,14 +11,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 public class ItemDao {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    public ItemDao(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-    }
 
     public void saveAll(List<Item> items) {
         String sql = "INSERT INTO ITEM VALUES (:id, :containedIn, :color) ON CONFLICT (ID) DO NOTHING";

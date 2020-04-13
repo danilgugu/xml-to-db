@@ -1,9 +1,12 @@
 package danil.xmltodb.model.xml;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
+@Getter
 @XmlRootElement(name = "Storage")
 public class Storage {
 
@@ -12,13 +15,5 @@ public class Storage {
 
     @XmlElement(name = "Item")
     private List<ItemXml> items;
-
-    public List<BoxXml> getBoxes() {
-        return boxes;
-    }
-
-    public List<ItemXml> getItems() {
-        return items;
-    }
 
 }

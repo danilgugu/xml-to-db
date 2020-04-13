@@ -24,6 +24,9 @@ paths:
                   type: string
                 containedIn:
                   type: integer
+              required:
+                - color
+                - containedIn
       responses:
         '200':
           description: OK
@@ -33,12 +36,6 @@ paths:
                 type: array
                 items:
                   type: string
-        '404':
-          description: not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
